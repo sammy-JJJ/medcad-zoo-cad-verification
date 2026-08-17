@@ -1,0 +1,85 @@
+// Scalpel handle
+// Reusable ergonomic surgical-style handle sized for a 6-inch overall assembly.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+handleLength = 115mm
+handleHalfLength = handleLength / 2
+handleBodyThickness = 14mm
+handleHalfWidth = handleBodyThickness / 2
+noseRadius = 5mm
+buttRadius = 7mm
+slotLength = 13mm
+slotWidth = 4.4mm
+
+handleProfile = sketch(on = XY) {
+  bottom = line(start = [var -57.5mm, var -7mm], end = [var 41.5mm, var -7mm])
+  bottomTaper = line(start = [var 41.5mm, var -7mm], end = [var 57.5mm, var -5mm])
+  noseArc = arc(start = [var 57.5mm, var -5mm], end = [var 57.5mm, var 5mm], center = [var 57.5mm, var 0mm])
+  topTaper = line(start = [var 57.5mm, var 5mm], end = [var 41.5mm, var 7mm])
+  top = line(start = [var 41.5mm, var 7mm], end = [var -57.5mm, var 7mm])
+  buttArc = arc(start = [var -57.5mm, var 7mm], end = [var -57.5mm, var -7mm], center = [var -57.5mm, var 0mm])
+
+  coincident([bottom.end, bottomTaper.start])
+  coincident([bottomTaper.end, noseArc.start])
+  coincident([noseArc.end, topTaper.start])
+  coincident([topTaper.end, top.start])
+  coincident([top.end, buttArc.start])
+  coincident([buttArc.end, bottom.start])
+
+  horizontal(bottom)
+  horizontal(top)
+
+  horizontalDistance([ORIGIN, bottom.start]) == -57.5mm
+  verticalDistance([ORIGIN, bottom.start]) == -7mm
+  horizontalDistance([ORIGIN, bottom.end]) == 41.5mm
+  verticalDistance([ORIGIN, bottom.end]) == -7mm
+  horizontalDistance([ORIGIN, bottomTaper.end]) == 57.5mm
+  verticalDistance([ORIGIN, bottomTaper.end]) == -5mm
+  horizontalDistance([ORIGIN, noseArc.center]) == 57.5mm
+  verticalDistance([ORIGIN, noseArc.center]) == 0mm
+  horizontalDistance([ORIGIN, noseArc.end]) == 57.5mm
+  verticalDistance([ORIGIN, noseArc.end]) == 5mm
+  horizontalDistance([ORIGIN, topTaper.end]) == 41.5mm
+  verticalDistance([ORIGIN, topTaper.end]) == 7mm
+  horizontalDistance([ORIGIN, top.end]) == -57.5mm
+  verticalDistance([ORIGIN, top.end]) == 7mm
+  horizontalDistance([ORIGIN, buttArc.center]) == -57.5mm
+  verticalDistance([ORIGIN, buttArc.center]) == 0mm
+}
+
+handleRegion = region(segments = [handleProfile.bottom, handleProfile.bottomTaper])
+handleBlank = extrude(handleRegion, length = handleBodyThickness, symmetric = true)
+hide(handleProfile)
+
+slotProfile = sketch(on = XY) {
+  slotBottom = line(start = [var 47mm, var -2.2mm], end = [var 60mm, var -2.2mm])
+  slotRight = line(start = [var 60mm, var -2.2mm], end = [var 60mm, var 2.2mm])
+  slotTop = line(start = [var 60mm, var 2.2mm], end = [var 47mm, var 2.2mm])
+  slotLeft = line(start = [var 47mm, var 2.2mm], end = [var 47mm, var -2.2mm])
+
+  coincident([slotBottom.end, slotRight.start])
+  coincident([slotRight.end, slotTop.start])
+  coincident([slotTop.end, slotLeft.start])
+  coincident([slotLeft.end, slotBottom.start])
+
+  horizontal(slotBottom)
+  horizontal(slotTop)
+  vertical(slotRight)
+  vertical(slotLeft)
+
+  horizontalDistance([ORIGIN, slotBottom.start]) == 47mm
+  verticalDistance([ORIGIN, slotBottom.start]) == -2.2mm
+  horizontalDistance([ORIGIN, slotBottom.end]) == 60mm
+  verticalDistance([ORIGIN, slotBottom.end]) == -2.2mm
+  horizontalDistance([ORIGIN, slotTop.end]) == 47mm
+  verticalDistance([ORIGIN, slotTop.end]) == 2.2mm
+}
+
+slotRegion = region(segments = [slotProfile.slotBottom])
+slotCutter = extrude(slotRegion, length = 20mm, symmetric = true)
+hide(slotProfile)
+
+handle = subtract(handleBlank, tools = [slotCutter])
+  |> appearance(color = "#4b5563", roughness = 42, metalness = 82)
+
+handle
