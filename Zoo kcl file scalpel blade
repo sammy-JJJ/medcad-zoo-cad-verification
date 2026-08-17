@@ -1,0 +1,60 @@
+// Scalpel blade
+// Replaceable surgical-style blade with a tapered cutting profile and tang.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+bladeOverallLength = 41.4mm
+bladeVisibleLength = 37.4mm
+bladeThickness = 1.2mm
+bladeTipWidth = 2mm
+bladeTangLength = 8mm
+
+bladeProfile = sketch(on = XY) {
+  tangBottom = line(start = [var -22.7mm, var -2mm], end = [var -14.7mm, var -2mm])
+  lowerShoulder = line(start = [var -14.7mm, var -2mm], end = [var -8mm, var -4.8mm])
+  cuttingEdge = line(start = [var -8mm, var -4.8mm], end = [var 18.7mm, var -1mm])
+  tip = line(start = [var 18.7mm, var -1mm], end = [var 18.7mm, var 1mm])
+  spine = line(start = [var 18.7mm, var 1mm], end = [var -8mm, var 6mm])
+  upperShoulder = line(start = [var -8mm, var 6mm], end = [var -14.7mm, var 2mm])
+  tangTop = line(start = [var -14.7mm, var 2mm], end = [var -22.7mm, var 2mm])
+  tangBack = line(start = [var -22.7mm, var 2mm], end = [var -22.7mm, var -2mm])
+
+  coincident([tangBottom.end, lowerShoulder.start])
+  coincident([lowerShoulder.end, cuttingEdge.start])
+  coincident([cuttingEdge.end, tip.start])
+  coincident([tip.end, spine.start])
+  coincident([spine.end, upperShoulder.start])
+  coincident([upperShoulder.end, tangTop.start])
+  coincident([tangTop.end, tangBack.start])
+  coincident([tangBack.end, tangBottom.start])
+
+  horizontal(tangBottom)
+  horizontal(tangTop)
+  vertical(tip)
+  vertical(tangBack)
+
+  horizontalDistance([ORIGIN, tangBottom.start]) == -22.7mm
+  verticalDistance([ORIGIN, tangBottom.start]) == -2mm
+  horizontalDistance([ORIGIN, tangBottom.end]) == -14.7mm
+  verticalDistance([ORIGIN, tangBottom.end]) == -2mm
+  horizontalDistance([ORIGIN, lowerShoulder.end]) == -8mm
+  verticalDistance([ORIGIN, lowerShoulder.end]) == -4.8mm
+  horizontalDistance([ORIGIN, cuttingEdge.end]) == 18.7mm
+  verticalDistance([ORIGIN, cuttingEdge.end]) == -1mm
+  horizontalDistance([ORIGIN, tip.end]) == 18.7mm
+  verticalDistance([ORIGIN, tip.end]) == 1mm
+  horizontalDistance([ORIGIN, spine.end]) == -8mm
+  verticalDistance([ORIGIN, spine.end]) == 6mm
+  horizontalDistance([ORIGIN, upperShoulder.end]) == -14.7mm
+  verticalDistance([ORIGIN, upperShoulder.end]) == 2mm
+  horizontalDistance([ORIGIN, tangTop.end]) == -22.7mm
+  verticalDistance([ORIGIN, tangTop.end]) == 2mm
+}
+
+bladeRegion = region(segments = [
+  bladeProfile.tangBottom,
+  bladeProfile.lowerShoulder
+])
+blade = extrude(bladeRegion, length = bladeThickness, symmetric = true)
+hide(bladeProfile)
+
+blade
