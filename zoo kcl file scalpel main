@@ -1,0 +1,16 @@
+// Six-inch surgical scalpel assembly
+// Separate reusable handle and replaceable blade, 152.4 mm overall length.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+import "scalpelHandle.kcl" as handlePart
+import "scalpelBlade.kcl" as bladePart
+
+bladePlacementX = 76.2mm
+
+handleInstance = handlePart
+bladeInstance = bladePart
+  |> translate(x = bladePlacementX, global = true)
+
+scalpelAssembly = [handleInstance, bladeInstance]
+
+scalpelAssembly
