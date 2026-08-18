@@ -1,0 +1,105 @@
+// Surgical scalpel blade
+// Slim symmetric blade with a rounded 5 mm tip and mounting slot.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+bladePartLength = 45mm
+bladeVisibleLength = 40mm
+bladeThickness = 1.2mm
+tipRadius = 5mm
+
+tipX = 20mm
+bladeTangBackX = -20mm
+bladeTangFrontX = -12mm
+shoulderX = 12mm
+
+bladeProfile = sketch(on = XY) {
+  tangBottom = line(start = [var -20mm, var -2.5mm], end = [var -12mm, var -2.5mm])
+  lowerEdge = line(start = [var -12mm, var -2.5mm], end = [var 12mm, var -5mm])
+  lowerTangent = line(start = [var 12mm, var -5mm], end = [var 20mm, var -5mm])
+  tipArc = arc(
+    start = [var 20mm, var -5mm],
+    end = [var 20mm, var 5mm],
+    center = [var 20mm, var 0mm],
+    direction = CCW,
+  )
+  upperTangent = line(start = [var 20mm, var 5mm], end = [var 12mm, var 5mm])
+  upperEdge = line(start = [var 12mm, var 5mm], end = [var -12mm, var 2.5mm])
+  tangTop = line(start = [var -12mm, var 2.5mm], end = [var -20mm, var 2.5mm])
+  tangBack = line(start = [var -20mm, var 2.5mm], end = [var -20mm, var -2.5mm])
+
+  coincident([tangBottom.end, lowerEdge.start])
+  coincident([lowerEdge.end, lowerTangent.start])
+  coincident([lowerTangent.end, tipArc.start])
+  coincident([tipArc.end, upperTangent.start])
+  coincident([upperTangent.end, upperEdge.start])
+  coincident([upperEdge.end, tangTop.start])
+  coincident([tangTop.end, tangBack.start])
+  coincident([tangBack.end, tangBottom.start])
+
+  horizontal(tangBottom)
+  horizontal(lowerTangent)
+  horizontal(upperTangent)
+
+  horizontalDistance([ORIGIN, tangBottom.start]) == bladeTangBackX
+  verticalDistance([ORIGIN, tangBottom.start]) == -2.5mm
+  horizontalDistance([ORIGIN, tangBottom.end]) == bladeTangFrontX
+  verticalDistance([ORIGIN, tangBottom.end]) == -2.5mm
+  horizontalDistance([ORIGIN, lowerEdge.end]) == shoulderX
+  verticalDistance([ORIGIN, lowerEdge.end]) == -tipRadius
+  horizontalDistance([ORIGIN, lowerTangent.end]) == tipX
+  verticalDistance([ORIGIN, lowerTangent.end]) == -tipRadius
+  horizontalDistance([ORIGIN, tipArc.center]) == tipX
+  verticalDistance([ORIGIN, tipArc.center]) == 0mm
+  horizontalDistance([ORIGIN, tipArc.end]) == tipX
+  verticalDistance([ORIGIN, tipArc.end]) == tipRadius
+  horizontalDistance([ORIGIN, upperTangent.end]) == shoulderX
+  verticalDistance([ORIGIN, upperTangent.end]) == tipRadius
+  horizontalDistance([ORIGIN, upperEdge.end]) == bladeTangFrontX
+  verticalDistance([ORIGIN, upperEdge.end]) == 2.5mm
+  horizontalDistance([ORIGIN, tangTop.end]) == bladeTangBackX
+  verticalDistance([ORIGIN, tangTop.end]) == 2.5mm
+}
+
+bladeRegion = region(
+  segments = [
+    bladeProfile.tangBottom,
+    bladeProfile.lowerEdge
+  ],
+  intersectionIndex = -1,
+  direction = CW,
+)
+bladeBlank = extrude(bladeRegion, length = bladeThickness, symmetric = true)
+hide(bladeProfile)
+
+mountSlotProfile = sketch(on = XY) {
+  bottom = line(start = [var -5mm, var -0.8mm], end = [var 3mm, var -0.8mm])
+  right = line(start = [var 3mm, var -0.8mm], end = [var 3mm, var 0.8mm])
+  top = line(start = [var 3mm, var 0.8mm], end = [var -5mm, var 0.8mm])
+  left = line(start = [var -5mm, var 0.8mm], end = [var -5mm, var -0.8mm])
+
+  coincident([bottom.end, right.start])
+  coincident([right.end, top.start])
+  coincident([top.end, left.start])
+  coincident([left.end, bottom.start])
+
+  horizontal(bottom)
+  horizontal(top)
+  vertical(right)
+  vertical(left)
+
+  horizontalDistance([ORIGIN, bottom.start]) == -5mm
+  verticalDistance([ORIGIN, bottom.start]) == -0.8mm
+  horizontalDistance([ORIGIN, bottom.end]) == 3mm
+  verticalDistance([ORIGIN, bottom.end]) == -0.8mm
+  horizontalDistance([ORIGIN, top.end]) == -5mm
+  verticalDistance([ORIGIN, top.end]) == 0.8mm
+}
+
+mountSlotRegion = region(segments = [mountSlotProfile.bottom])
+mountSlotCutter = extrude(mountSlotRegion, length = 4mm, symmetric = true)
+hide(mountSlotProfile)
+
+scalpelBlade = subtract(bladeBlank, tools = [mountSlotCutter])
+  |> appearance(color = "#d9dde3", roughness = 24, metalness = 92)
+
+scalpelBlade
