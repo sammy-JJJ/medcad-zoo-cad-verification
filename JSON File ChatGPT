@@ -1,0 +1,25 @@
+{
+"units": "mm",
+"overall_length": {
+"value": 150,
+"tolerance": 0.2,
+"critical": true,
+"source": "drawing"
+},
+"shaft_width": {
+"value": 12,
+"tolerance": 0.1,
+"critical": true,
+"source": "drawing"
+},
+"tip_radius": {
+"value": 5,
+"tolerance": 0.2,
+"critical": true,
+"source": "drawing"
+},
+"constraints": [
+"tip_tangent_to_shaft",
+"symmetric_about_centerline"
+]
+}
