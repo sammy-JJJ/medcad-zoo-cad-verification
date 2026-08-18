@@ -1,0 +1,123 @@
+// Surgical scalpel handle
+// Rounded butt, dense textured grip ribs, narrow neck, and centered blade interface.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+handleLength = 110mm
+shaftWidth = 12mm
+shaftHalfWidth = 6mm
+handleThickness = 8mm
+neckWidth = 6mm
+neckHalfWidth = neckWidth / 2
+slotStartX = 48mm
+slotEndX = 58mm
+slotWidth = 5mm
+gripRibSpacing = 4mm
+gripRibWidth = 2mm
+
+handleProfile = sketch(on = XY) {
+  bottom = line(start = [var -55mm, var -6mm], end = [var 43mm, var -6mm])
+  bottomTaper = line(start = [var 43mm, var -6mm], end = [var 55mm, var -3mm])
+  noseArc = arc(start = [var 55mm, var -3mm], end = [var 55mm, var 3mm], center = [var 52mm, var 0mm])
+  topTaper = line(start = [var 55mm, var 3mm], end = [var 43mm, var 6mm])
+  top = line(start = [var 43mm, var 6mm], end = [var -55mm, var 6mm])
+  buttArc = arc(start = [var -55mm, var 6mm], end = [var -55mm, var -6mm], center = [var -55mm, var 0mm])
+
+  coincident([bottom.end, bottomTaper.start])
+  coincident([bottomTaper.end, noseArc.start])
+  coincident([noseArc.end, topTaper.start])
+  coincident([topTaper.end, top.start])
+  coincident([top.end, buttArc.start])
+  coincident([buttArc.end, bottom.start])
+
+  horizontal(bottom)
+  horizontal(top)
+
+  horizontalDistance([ORIGIN, bottom.start]) == -55mm
+  verticalDistance([ORIGIN, bottom.start]) == -shaftHalfWidth
+  horizontalDistance([ORIGIN, bottom.end]) == 43mm
+  verticalDistance([ORIGIN, bottom.end]) == -shaftHalfWidth
+  horizontalDistance([ORIGIN, bottomTaper.end]) == 55mm
+  verticalDistance([ORIGIN, bottomTaper.end]) == -neckHalfWidth
+  horizontalDistance([ORIGIN, noseArc.center]) == 52mm
+  verticalDistance([ORIGIN, noseArc.center]) == 0mm
+  horizontalDistance([ORIGIN, noseArc.end]) == 55mm
+  verticalDistance([ORIGIN, noseArc.end]) == neckHalfWidth
+  horizontalDistance([ORIGIN, topTaper.end]) == 43mm
+  verticalDistance([ORIGIN, topTaper.end]) == shaftHalfWidth
+  horizontalDistance([ORIGIN, top.end]) == -55mm
+  verticalDistance([ORIGIN, top.end]) == shaftHalfWidth
+  horizontalDistance([ORIGIN, buttArc.center]) == -55mm
+  verticalDistance([ORIGIN, buttArc.center]) == 0mm
+}
+
+handleRegion = region(segments = [
+  handleProfile.bottom,
+  handleProfile.bottomTaper
+])
+handleBlank = extrude(handleRegion, length = handleThickness, symmetric = true)
+hide(handleProfile)
+
+slotProfile = sketch(on = XY) {
+  bottom = line(start = [var 48mm, var -2.5mm], end = [var 58mm, var -2.5mm])
+  right = line(start = [var 58mm, var -2.5mm], end = [var 58mm, var 2.5mm])
+  top = line(start = [var 58mm, var 2.5mm], end = [var 48mm, var 2.5mm])
+  left = line(start = [var 48mm, var 2.5mm], end = [var 48mm, var -2.5mm])
+
+  coincident([bottom.end, right.start])
+  coincident([right.end, top.start])
+  coincident([top.end, left.start])
+  coincident([left.end, bottom.start])
+
+  horizontal(bottom)
+  horizontal(top)
+  vertical(right)
+  vertical(left)
+
+  horizontalDistance([ORIGIN, bottom.start]) == slotStartX
+  verticalDistance([ORIGIN, bottom.start]) == -slotWidth / 2
+  horizontalDistance([ORIGIN, bottom.end]) == slotEndX
+  verticalDistance([ORIGIN, bottom.end]) == -slotWidth / 2
+  horizontalDistance([ORIGIN, top.end]) == slotStartX
+  verticalDistance([ORIGIN, top.end]) == slotWidth / 2
+}
+
+slotRegion = region(segments = [slotProfile.bottom])
+slotCutter = extrude(slotRegion, length = 20mm, symmetric = true)
+hide(slotProfile)
+
+slottedHandle = subtract(handleBlank, tools = [slotCutter])
+
+gripRibProfile = sketch(on = XY) {
+  bottom = line(start = [var -25mm, var -7mm], end = [var -23mm, var -7mm])
+  right = line(start = [var -23mm, var -7mm], end = [var -23mm, var 7mm])
+  top = line(start = [var -23mm, var 7mm], end = [var -25mm, var 7mm])
+  left = line(start = [var -25mm, var 7mm], end = [var -25mm, var -7mm])
+
+  coincident([bottom.end, right.start])
+  coincident([right.end, top.start])
+  coincident([top.end, left.start])
+  coincident([left.end, bottom.start])
+
+  horizontalDistance([ORIGIN, bottom.start]) == -25mm
+  verticalDistance([ORIGIN, bottom.start]) == -7mm
+  horizontalDistance([ORIGIN, bottom.end]) == -23mm
+  verticalDistance([ORIGIN, bottom.end]) == -7mm
+  horizontalDistance([ORIGIN, right.end]) == -23mm
+  verticalDistance([ORIGIN, right.end]) == 7mm
+  horizontalDistance([ORIGIN, top.end]) == -25mm
+  verticalDistance([ORIGIN, top.end]) == 7mm
+}
+
+gripRibRegion = region(segments = [gripRibProfile.bottom])
+gripRibBase = extrude(gripRibRegion, length = 4.6mm)
+hide(gripRibProfile)
+
+gripRibs = gripRibBase
+  |> patternLinear3d(axis = X, instances = 12, distance = gripRibSpacing)
+
+gribbedHandle = subtract(slottedHandle, tools = gripRibs)
+
+scalpelHandle = gribbedHandle
+  |> appearance(color = "#4b5563", roughness = 42, metalness = 82)
+
+scalpelHandle
