@@ -1,0 +1,22 @@
+// Precision 150 mm scalpel assembly
+// Drawing-driven model with 12 mm symmetric shaft width and 5 mm tangent tip radius.
+@settings(defaultLengthUnit = mm, kclVersion = 2.0)
+
+overallLength = 150mm
+shaftWidth = 12mm
+tipRadius = 5mm
+handleLength = 110mm
+bladeVisibleLength = 40mm
+bladePartLength = 45mm
+bladePlacementX = 70mm
+
+import "scalpelHandle.kcl" as handlePart
+import "scalpelBlade.kcl" as bladePart
+
+handleInstance = handlePart
+bladeInstance = bladePart
+  |> translate(x = bladePlacementX, global = true)
+
+scalpelAssembly = [handleInstance, bladeInstance]
+
+scalpelAssembly
